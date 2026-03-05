@@ -37,6 +37,9 @@
 - (void)applicationWillFinishLaunching {
     SSMainMenu *menu = [[SSMainMenu alloc] init];
     [menu setAppName:@"SmallPlayer"];
+    [menu setAboutAppName:@"SmallPlayer"];
+    [menu setAboutVersion:@"1.0"];
+    [menu setAboutTarget:self];
     NSArray *items = @[
         [SSMainMenuItem itemWithTitle:@"Open..." action:@selector(openFile:) keyEquivalent:@"o" modifierMask:NSCommandKeyMask target:self],
     ];
@@ -189,12 +192,38 @@
     [self updateTimeLabel];
 }
 
+- (void)showAbout:(id)sender {
+    (void)sender;
+    [SSAboutPanel showWithAppName:@"SmallPlayer" version:@"1.0"];
+}
+
 - (void)updateTimeLabel {
     double cur = [_playerEngine currentTime];
     double dur = [_playerEngine duration];
     NSString *curStr = [self timeStringFromSeconds:cur];
     NSString *durStr = (dur >= 0) ? [self timeStringFromSeconds:dur] : @"--:--";
     [_timeLabel setStringValue:[NSString stringWithFormat:@"%@ / %@", curStr, durStr]];
+}
+
+- (void)openFile:(id)sender {
+    (void)sender;
+    SSFileDialog *dialog = [SSFileDialog openDialog];
+    [dialog setCanChooseFiles:YES];
+    [dialog setCanChooseDirectories:NO];
+    [dialog setAllowsMultipleSelection:NO];
+    NSArray *urls = [dialog showModal];
+    if (urls && [urls count] > 0) {
+        NSURL *url = [urls objectAtIndex:0];
+        NSString *path = [url path];
+        if (path && [_playerEngine openFile:path]) {
+            [_mainWindow setTitle:[NSString stringWithFormat:@"SmallPlayer - %@", [path lastPathComponent]]];
+            [_playPauseButton setTitle:@"Play"];
+            [self updateTimeLabel];
+        }
+    }
+#if defined(GNUSTEP) && !__has_feature(objc_arc)
+    [dialog release];
+#endif
 }
 
 - (NSString *)timeStringFromSeconds:(double)sec {

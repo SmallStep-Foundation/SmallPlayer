@@ -30,11 +30,13 @@ SmallPlayer_HEADER_FILES = \
 	Sources/Backend/SPMencoderBackend.h \
 	Sources/Backend/SPMpvBackend.h
 
-SmallPlayer_RESOURCE_FILES =
+SmallPlayer_RESOURCE_FILES = Resources/logo.png
 
 # SmallStep (sibling) + FFmpeg (pkg-config or fallback) + source dirs for cross-dir imports
 SmallPlayer_INCLUDE_DIRS = -I. -ISources/App -ISources/Player -ISources/Backend -I../SmallStep -I../SmallStep/SmallStep/Core -I../SmallStep/SmallStep/Platform/Linux $(shell pkg-config --cflags libavformat libavcodec libavutil libswscale 2>/dev/null || echo "-I/usr/include")
 SmallPlayer_LDFLAGS = -L../SmallStep/$(GNUSTEP_OBJ_DIR) -lSmallStep $(shell pkg-config --libs libavformat libavcodec libavutil libswscale 2>/dev/null || echo "-lavformat -lavcodec -lavutil -lswscale")
+before-all::
+	mkdir -p Resources && cp -f ../SmallStepLib/Resources/logo.png Resources/logo.png 2>/dev/null || true
 before-internal-all::
 	$(MAKE) -C ../SmallStep
 
